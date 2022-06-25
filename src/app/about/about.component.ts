@@ -26,18 +26,27 @@ export class AboutComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {
-    document.addEventListener("click", (clickEvent: MouseEvent) => {
-      console.log("Click Event Details: ", clickEvent);
-
-      setTimeout(() => {
-        console.log("finished");
-        let counter = 0;
-        setInterval(() => {
-          console.log(counter);
-          counter++;
-        }, 1000);
-          
-      }, 3000);
+      const http$ = Observable.create((observer) => {
+        
+      fetch("http://localhost:9000/api/courses")
+        .then((response) => {
+          return response.json();
+        })
+        .then((body) => {
+          observer.next(body);
+          observer.complete();
+        })
+        .catch((err) => {
+          observer.error(err);
+        });
     });
+
+    http$.subscribe(
+      (arg) => console.log(arg),
+      noop,
+      () => {
+        console.log("completed");
+      }
+    );
   }
 }
