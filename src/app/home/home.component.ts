@@ -12,6 +12,7 @@ import {
 } from "rxjs/operators";
 import { createHttpObservable } from "../common/util";
 
+
 @Component({
   selector: "home",
   templateUrl: "./home.component.html",
@@ -28,17 +29,13 @@ export class HomeComponent implements OnInit {
     const http$ = createHttpObservable("/api/courses");
 
     const courses$: Observable<Course[]> = http$.pipe(
-          catchError(err => {
-          console.log("error occurred ", err);
-          return throwError(err)
-          }),
-        finalize(() =>
-        {
-          console.log("finalized");
-        }),
+         
         tap(()=>console.log("http executed")),
         map((res) => Object.values(res["payload"])),
-        shareReplay()
+        shareReplay(),
+         retryWhen(err => err.pipe(
+          delayWhen(()=> timer(2000))
+        ))
     );
 
     this.beginnerCourses$ = courses$.pipe(
